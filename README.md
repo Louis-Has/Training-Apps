@@ -1,8 +1,32 @@
+#### 翁英浩 ——应聘前端开发
+
+电话：17826805426
+
+邮箱：2354949236@qq.com
+
+#### 个人介绍
+
+2015.9——2020.6：本科（建筑学）毕业
+
+2020.6——2021.11：杭州捷保有信信息技术有限公司/前端开发
+
+#### 技术栈
+
+切页面：HTML5、CSS3、SASS、Photohop
+代码管理：Git、Github
+构件工具：ESLint、babel、webpack
+编程语言：JavaScript、Node.js、TypeScript
+调试工具：Firebug、Chrome Dev Tools
+前端标准/规范：HTTP/1.1/2、ECMAScript5/6、W3C:DOM、BOM、XML、JSON、CommonJS、SEO
+编程知识储备：数据结构、OOP/AOP、常用的数据结构转换、RegExp、TCP/UDP
+JavaScript相关概念：闭包、高阶函数、原型/原型链/作用域链、Class、Promise、异步迭代
+前端库\框架：jQuery、Bootstrap、Ant Design、原生DOM操作、冒泡和捕获
+React：Hooks、
+相关模块：React-CLI、Redux、useimmer、SWR、Moment、react-contenteditable、Axios
+后端模块：sqlite、cookieParser、Express
+
 
 # 项目介绍
-
-
-
 
 #### 腾讯投票小程序（前后端分离）
 
@@ -40,3 +64,7 @@ todos主页面右侧详细信息实现实时同步
 解析匹配字符或字符串，且记录预测信息，用多维数组记录“|”，再使用原生DOM操绘制出各组件间关系及信息
 
 解析正则表达式，用铁路图表示出各部分的功能及之间的顺序、关系
+
+<img src="https://github.com/Scout-szz/Training-Apps/blob/main/introduces/%E6%AD%A3%E5%88%99%E9%93%81%E8%B7%AF%E5%9B%BE%E8%A7%A3%E6%9E%90.png" alt="todos主页面右侧详细信息实现实时同步" style="width:50%" />
+
+
