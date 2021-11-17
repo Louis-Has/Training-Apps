@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>reg-rail</title>
+</head>
+
+<body>
+    <main>
+        <input type="text" name="input" style="width: 1000px ;height:32px"
+            placeholder="bvsd(a(a(a)?)+)*(p|d|(?<testname>ccc|ddd|eee|fff))(?!foo)(hufa|((a{2,4}b{0,99}c{1,99}d{3}e{4}f{4,})*)*(?:[^aeiwu]*)*(cd|ef|(fo[odc]+)+dd)+c[def]|def|abc)">
+        <!-- <svg height="1106px" width="2941px" style="border:2px solid red"></svg> -->
+    </main>
+    <!-- <div style="background-color: orange;border-radius: 4px;margin: 12px;"></div> -->
+    <!-- <script src="/miao/jquery-3.6.0.js"></script> -->
+    <script src="https://code.jquery.com/jquery-3.6.0.js"></script>
+    <script>
+        let str = 'bvsd(a(a(a)?)+)*(p|d|(?<testname>ccc|ddd|eee|fff))(?!foo)(hufa|((a{2,4}b{0,99}c{1,99}d{3}e{4}f{4,})*)*(?:[^aeiwu]*)*(cd|ef|(fo[odc]+)+dd)+c[def]|def|abc)'
+
+        function regex_cell(val) {
+            this.val = val
+            this.type = 'char'
+            this.des = ''
+            //[{val:char,des:'|'},charClass,char]
+        }
+
+        function analysis(str) {
+            let st = 0
+            function evolution(str) {
+                let node = new regex_cell([[]])
+                let pa = 0
+                for (; st < str.length; st++) {
+                    if (str[st] === '(' && str[st + 1] === '?' && str[st + 2] === ':') {
+                        st += 3
+                        let dh = evolution(str)
+                        dh.type = 'shy groups'
+                        node.val[pa].push(dh)
+
+                    } else if (str[st] === '(' && str[st + 1] === '?' && str[st + 2] === '=') {
+                        st += 3
+                        let dh = evolution(str)
+                        dh.type = 'look ahead positive assert'
+                        node.val[pa].push(dh)
+
+                    } else if (str[st] === '(' && str[st + 1] === '?' && str[st + 2] === '!') {
+                        st += 3
+                        let dh = evolution(str)
+                        dh.type = 'negative assert'
+                        node.val[pa].push(dh)
+
+                    } else if (str[st] === '(' && str[st + 1] === '?' && str[st + 2] === '<' && str.indexOf('>' > st + 1)) {
+                        en = str.indexOf('>')
+                        let tem = str.slice(st + 3, en)
+                        st = en + 1
+                        let dh = evolution(str)
+                        dh.type = `Groups and ranges:${tem}`
+                        node.val[pa].push(dh)
+
+                    } else if (str[st] === '(' && str[st + 1] === '?' && str[st + 2] === '<' && str[st + 3] === '=') {
+                        st += 3
+                        let dh = evolution(str)
+                        dh.type = 'look behind'
+                        node.val[pa].push(dh)
+
+                    } else if (str[st] === '(' && str[st + 1] === '?' && str[st + 2] === '<' && str[st + 3] === '!') {
+                        st += 3
+                        let dh = evolution(str)
+                        dh.type = 'look negative behind'
+                        node.val[pa].push(dh)
+
+                    } else if (str[st] === '(') {
+                        //group
+                        st++
+                        node.val[pa].push(evolution(str))
+
+                    } else if (str[st] === '|') {
+                        pa++
+                        node.val.push([])
+
+                    } else if (str[st] === '[' && str[st + 1] === '^') {
+                        //negated character classes
+                        st += 2
+                        let dv = evolution(str)
+                        dv.type = 'negated character classes'
+                        node.val[pa].push(dv)
+
+                    } else if (str[st] === '[') {
+                        //charClass
+                        st++
+                        let dv = evolution(str)
+                        dv.type = 'negated character classes'
+                        node.val[pa].push(dv)
+
+                    } else if (str[st] === '{') {
+                        //classifier
+                        while (str[++st] !== '}')
+                            node.val[pa][node.val[pa].length - 1].des += str[st]
+
+                    } else if (str[st] === '*') {
+                        node.val[pa][node.val[pa].length - 1].des = '0-99'
+
+                    } else if (str[st] === '+') {
+                        node.val[pa][node.val[pa].length - 1].des = '1-99'
+
+                    } else if (str[st] === '?') {
+                        node.val[pa][node.val[pa].length - 1].des = '0-1'
+
+                    } else if (str[st] === ')' || str[st] === '>' || str[st] === ']') {
+                        return node
+
+                    } else {
+                        //char
+                        node.val[pa].push(new regex_cell(str[st]))
+                    }
+                }
+                return node
+            }
+            return evolution(str)
+        }
+        // let node = analysis('sa?[s2](s(f((?!bt){3}a)*n{2,4}s(?=d)d(o)*dd|f{2,4})w)4(d[3]j|s(s|a{2}js)s|s{3,5}f)s(s){9}a')
+        let node = analysis(str)
+        console.log(node)
+
+
+        let width = 28
+        let height = 48
+
+        let r = 12
+
+        function regToPaint(node, note = 'Group') {
+            let dv = document.createElement('div')
+            dv.style.display = 'flex'
+            dv.style.flexFlow = 'column'
+            dv.style.border = '1px solid blue'
+            dv.style.position = 'relative'
+            dv.style.width = 'fit-content'
+            //cookie
+            let cookie = document.createElement('span')
+            cookie.innerHTML += note
+            cookie.style.position = 'absolute'
+            cookie.style.top = 0
+            dv.prepend(cookie)
+
+            for (let u in node.val) {
+                //or
+                let dv_d2 = document.createElement('div')
+                dv_d2.style.display = 'flex'
+                if (node.type === 'negated character classes')
+                    dv_d2.style.flexFlow = 'column'
+                dv_d2.style.border = '2px solid red'
+                dv_d2.style.alignItems = 'center'
+                dv_d2.style.justifyContent = 'center'
+                dv_d2.style.padding = height / 2 + 'px'
+                dv.append(dv_d2)
+
+                for (let i in node.val[u]) {
+                    if (typeof node.val[u][i].val === 'string') {
+                        let dv_d3 = document.createElement('div')
+                        dv_d3.style.width = `${width}px`
+                        dv_d3.style.height = `${height}px`
+                        dv_d3.style.backgroundColor = `orange`
+                        dv_d3.style.borderRadius = `4px`
+                        dv_d3.style.margin = `12px`
+                        dv_d3.style.display = `flex`
+                        dv_d3.style.justifyContent = `center`
+                        dv_d3.style.alignItems = `center`
+                        //value-for-match
+                        dv_d3.innerHTML = `${node.val[u][i].val}`
+                        dv_d2.append(dv_d3)
+
+                        //classifier
+                        $(dv_d2).append(`<span>${node.val[u][i].des}</span>`)
+                    } else {
+                        $(dv_d2).append(`<span>${node.val[u][i].type}</span>`)
+                        //cookie
+                        let zd = note
+                        note += `#${+i + 1}`
+                        $(dv_d2).append(regToPaint(node.val[u][i], note))
+                        note = zd
+
+                    }
+                }
+            }
+            return dv
+        }
+        $('main').append(regToPaint(node))
+
+
+        // let svg = document.querySelector('svg')
+
+        // function svgEL(tagName, attrs) {
+        //     let dv = document.createElementNS('http://www.w3.org/2000/svg', tagName)
+        //     for (let key in attrs) {
+        //         let val = attrs[key]
+        //         dv.setAttribute(key, val)
+        //     }
+        //     // console.log(dv)
+        //     return dv
+        // }
+
+        // function paintCurve(node1, node2) {
+        //     svg.append(svgEL('path', {
+        //         d: `m ${node1.offsetLeft + node1.offsetWidth} ${node1.offsetTop + node1.offsetHeight / 2}
+        //     c ${node2.offsetLeft - node1.offsetLeft - node2.offsetWidth} ${0},
+        //     ${0} ${node2.offsetTop - node1.offsetTop + node2.offsetHeight / 2 - node1.offsetHeight / 2},
+        //     ${node2.offsetLeft - node1.offsetLeft - node2.offsetWidth} ${node2.offsetTop - node1.offsetTop + node2.offsetHeight / 2 - node1.offsetHeight / 2}`,
+        //         stroke: 'red',
+        //         fill: 'transparent'
+        //     }))
+        // }
+
+        // function paintText(str) {
+        //     let text = svgEL('text', { x: 10, y: 20 })
+        //     text.textContent = str
+        //     svg.append(text)
+        // }
+
+        // addEventListener('mousemove', () => {
+        // svg.innerHTML = ''
+
+        // function paintNode(node) {
+            // if (typeof node.val[0].val == 'string') {
+            //     for (let u = 1; u < node.val.length; u++) {
+            //         paintCurve(node.val[u - 1], node.val[u])
+            //     }
+            // } else {
+            //     node.val.forEach(ele => {
+            //         paintNode(ele)
+            //     })
+
+            //     for (let u of node.val) {
+            //         for (let i of node.val[u]) {
+            //             paintText(node.val[u][i].val)
+            //         }
+            //     }
+
+
+
+            // }
+
+
+
+
+        //     if (typeof node.val[0].val === 'string') {
+        //         paintText(node.val[0].val)
+        //     } else {
+        //         node.val.forEach(ele => {
+        //             paintNode(ele)
+        //         })
+        //     }
+
+
+
+
+        // }
+
+        // paintNode(node)
+
+
+
+
+
+
+
+    </script>
+</body>
+
+</html>
