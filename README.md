@@ -10,7 +10,7 @@
 
 React模块化开发，实现登录、新建单选/多选投票，详细展示投票结果
 
-<img src="\vote项目.多选项页面.jpg" style="zoom: 25%;" />
+<img src="[\vote项目.多选项页面.jpg](https://github.com/Scout-szz/Training-Apps/blob/main/introduces/vote%E9%A1%B9%E7%9B%AE.%E5%A4%9A%E9%80%89%E9%A1%B9%E9%A1%B5%E9%9D%A2.jpg)" style="zoom: 25%;" />
 投票前端多选项页面展示
 
 <img src="D:\2-Code\Training-Apps\introduces\vote项目多选项页面及向后端发送创建投票.png" style="zoom:25%;" />
